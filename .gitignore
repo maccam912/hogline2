@@ -1,4 +1,4 @@
-# Python environments (the SAM ones are hundreds of MB)
+# Python environments
 .venv*/
 
 # secrets: keep the example, never the real thing
@@ -6,10 +6,8 @@
 .env.*
 !.env.example
 
-# recordings, detections, run output, model weights and vendored code: large and reproducible
+# recordings, detections and run output: large and reproducible
 data/
-models/
-vendor/
 stonetrack/runs/
 
 # caches and build output

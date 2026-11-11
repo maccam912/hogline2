@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hogline2",
+      "runtimeExecutable": ".venv/bin/hogline2",
+      "runtimeArgs": ["serve", "--port", "8772"],
+      "port": 8772
+    }
+  ]
+}
