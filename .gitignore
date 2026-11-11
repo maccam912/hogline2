@@ -1,0 +1,30 @@
+# Python environments (the SAM ones are hundreds of MB)
+.venv*/
+
+# secrets: keep the example, never the real thing
+.env
+.env.*
+!.env.example
+
+# recordings, detections, run output, model weights and vendored code: large and reproducible
+data/
+models/
+vendor/
+stonetrack/runs/
+
+# caches and build output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# logs, scratch, editor and OS files
+*.log
+_to_delete/
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,2 @@
+# Additional dependency for offline trajectory fitting; install in .venv-sam only.
+scipy==1.18.1

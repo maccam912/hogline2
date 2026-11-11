@@ -1,0 +1,111 @@
+{
+  "source": {
+    "title": "Nov 6 \u2014 Friday 6:15 Mixed League \u2014 Koski, Lindsey vs Tillisch, Cal (Sheet 1)",
+    "url": "https://www.youtube.com/watch?v=eDJdwj0JqBY",
+    "path": "/Users/maccam912/dev/hogline/data/post-live/f87db63f-9e2a-4a1b-8f97-4d3281a0f675/recording.mp4",
+    "sha256": "44590b63cab5d49e1c253fbac1224e84fe072016b8cdaae860c85844db8aabe2",
+    "duration_seconds": 7480.066667,
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "full_decoded_rgb_bytes_estimate": 2791919923200
+  },
+  "cases": [
+    {
+      "name": "clear-yellow-3603",
+      "start": 3603.0,
+      "duration": 8.0,
+      "crop": [
+        0,
+        0,
+        720,
+        990
+      ],
+      "point": [
+        405,
+        551
+      ],
+      "fps": 60,
+      "frames": 480,
+      "elapsed_seconds": 228.79601354105398,
+      "metal_peak_bytes": 3777387144,
+      "nonempty_frames": 442,
+      "samples": [
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/clear-yellow-3603/frame-0000.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/clear-yellow-3603/frame-0120.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/clear-yellow-3603/frame-0240.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/clear-yellow-3603/frame-0360.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/clear-yellow-3603/frame-0479.jpg"
+      ],
+      "notice": "Single manually initialized stone. Masks and centroids are model proposals, not calibrated ice coordinates or verified identities.",
+      "first_empty_source_seconds": 3610.366666666667,
+      "effective_processed_fps": 2.0979386509890885
+    },
+    {
+      "name": "sweepers-red-1849",
+      "start": 1849.0,
+      "duration": 8.0,
+      "crop": [
+        0,
+        0,
+        720,
+        990
+      ],
+      "point": [
+        464,
+        657
+      ],
+      "fps": 60,
+      "frames": 480,
+      "elapsed_seconds": 246.4626598750474,
+      "metal_peak_bytes": 3777387144,
+      "nonempty_frames": 342,
+      "samples": [
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/sweepers-red-1849/frame-0000.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/sweepers-red-1849/frame-0120.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/sweepers-red-1849/frame-0240.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/sweepers-red-1849/frame-0360.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/sweepers-red-1849/frame-0479.jpg"
+      ],
+      "notice": "Single manually initialized stone. Masks and centroids are model proposals, not calibrated ice coordinates or verified identities.",
+      "first_empty_source_seconds": 1854.7,
+      "effective_processed_fps": 1.9475566815815113
+    },
+    {
+      "name": "opposite-yellow-5031",
+      "start": 5031.0,
+      "duration": 8.0,
+      "crop": [
+        1200,
+        0,
+        1920,
+        990
+      ],
+      "point": [
+        239,
+        611
+      ],
+      "fps": 60,
+      "frames": 480,
+      "elapsed_seconds": 228.7767277089879,
+      "metal_peak_bytes": 3777387144,
+      "nonempty_frames": 480,
+      "samples": [
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/opposite-yellow-5031/frame-0000.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/opposite-yellow-5031/frame-0120.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/opposite-yellow-5031/frame-0240.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/opposite-yellow-5031/frame-0360.jpg",
+        "/Users/maccam912/dev/hogline/data/experiments/sam21-mlx/outputs/opposite-yellow-5031/frame-0479.jpg"
+      ],
+      "notice": "Single manually initialized stone. Masks and centroids are model proposals, not calibrated ice coordinates or verified identities.",
+      "first_empty_source_seconds": null,
+      "effective_processed_fps": 2.098115506794804
+    }
+  ],
+  "total_frames": 1440,
+  "total_clip_seconds": 24.0,
+  "total_processing_seconds": 704.0354011250893,
+  "peak_metal_bytes": 3777387144,
+  "scope": "Three manually seeded eight-second single-camera excerpts; not a whole-game reconstruction.",
+  "validation": "All six output videos decoded: 480 frames and 8 seconds each. Sample overlays inspected visually. No labeled benchmark or full-frame-by-frame correctness audit."
+}

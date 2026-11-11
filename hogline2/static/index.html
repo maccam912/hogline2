@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hogline 2 · Complete ends</title><link rel="stylesheet" href="/static/style.css"></head>
+<body><header><div class="brand">◉ HOGline <span>2</span></div><p>One recording. Every end, intact.</p></header>
+<main><section class="import"><div><p class="eyebrow">START WITH THE RECORDING</p><h1>Keep the whole end.</h1>
+<p>From the first delivery through the final clearing. Original camera views and audio stay together.</p></div>
+<form id="import"><label>YouTube recording<input id="url" type="url" required placeholder="https://www.youtube.com/watch?v=…"></label>
+<div class="formrow"><label class="count">Expected ends <small>optional check</small><input id="expected" type="number" min="1" max="99" placeholder="Any"></label>
+<button type="submit">Download & split into ends</button></div></form></section>
+<p id="configuration" class="muted"></p><div id="error" role="alert" hidden></div>
+<div class="workspace"><aside><h2>Recordings</h2><div id="recordings"></div></aside>
+<section id="detail"><div class="empty"><h2>Your ends will appear here.</h2><p>Paste a YouTube link to download, find boundaries and create a clip for each end.</p></div></section></div>
+<footer><b>Track stones across views.</b> Open a recording’s Stone tracking page to calibrate the ice and run SAM.</footer></main>
+<script type="module" src="/static/app.js"></script></body></html>

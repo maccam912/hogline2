@@ -1,0 +1,33 @@
+SAM 2.1 MLX — isolated curling experiment
+
+Source: November 6, 2026, Friday 6:15 Mixed League, Koski vs Tillisch, Sheet 1.
+Existing local 1080p60 recording reused and its SHA-256 verified against the catalog.
+Only read-only SQLite queries were used. No production jobs, dependencies, source files,
+reviews, or database records were changed by this experiment.
+
+Runtime: Apple M5 Pro GPU, 64 GiB unified memory; SAM 2.1 Base Plus MLX.
+Vendor: https://github.com/eisneim/sam2.1_mlx
+Revision: 036f2d02a9069871fd2bf47109ff3b522cd222c4
+Weights: https://huggingface.co/eisneim/sam2.1_mlx
+Strict parameter loading succeeds; installed versions are in requirements-frozen.txt.
+
+Method: Three eight-second clips, original 60 fps. Each full camera-crop clip is
+loaded in memory. One manually inspected positive point on the stone body initializes
+each independent track. No corrective prompts are added later. The model uses its
+own predicted-quality ranking to choose the mask, matching the vendor demo.
+Completed image-feature tensors are discarded; initial conditioning memory and the
+16 most recent object-pointer slots are preserved. This bounds cached GPU state
+without changing the model's forward memory selection. Vendor files are unchanged.
+
+Outputs per clip: side-by-side source and green mask overlay, mask video, per-frame
+pixel observations, sample images, and manifest with runtime and frame counts.
+Mask quality scores are uncalibrated. Pixel centroids are NOT calibrated stone
+positions. This trial does not reconstruct a complete shot across cameras or establish
+whole-game tracking accuracy. Representative means selected illustrative cases,
+not a statistically representative evaluation set. Two targets are yellow and one red.
+
+Rerun from repository root (Apple GPU access required):
+nice -n 10 data/experiments/sam21-mlx/venv/bin/python -u data/experiments/sam21-mlx/run_experiment.py
+
+The entire compressed source is about 2 GB; full decoded RGB at 60 fps would be
+about 2.8 TB, before model preprocessing. Complete individual clips fit in memory.
