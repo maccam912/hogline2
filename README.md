@@ -1,137 +1,111 @@
 # Hogline 2
 
-A fresh, independent curling-video workbench: paste a YouTube recording, download it,
-detect physical ends, and export one intact original-layout clip per end. The end splitter does not score or identify players. A separate SAM tracking page now
-provides calibrated camera views, per-end stone identities and a top-down replay.
+A local workbench for curling game video. Paste the link to a finished YouTube stream and it will:
+
+1. download the recording and split it into ends,
+2. track every stone down the sheet in each end,
+3. let you step through the shots, mark the skip's broom and label the call, and
+4. report line and weight per player.
 
 ## Run
 
-Requires Python 3.12+, `uv`, `ffmpeg`/`ffprobe`, and `yt-dlp` on PATH.
+Requires Python 3.12+, [`uv`](https://docs.astral.sh/uv/), `ffmpeg`/`ffprobe` and `yt-dlp` on PATH.
 
 ```sh
-cd ~/dev/hogline2
 uv sync --group dev
-cp .env.example .env # only if you do not already have a configured .env
-# Set OPENAI_API_KEY in .env for automatic boundary detection.
-uv run hogline2 serve --port 8772
+cp .env.example .env    # set OPENAI_API_KEY for automatic end detection
+uv run hogline2 serve   # http://127.0.0.1:8772
 ```
 
-Open http://127.0.0.1:8772. Paste an ended YouTube stream and choose **Download & split
-into ends**. Jobs, source video, boundary evidence, editable cut points and exported
-clips are in one screen. The app binds to localhost. One worker processes recordings
-sequentially; the visual survey has two concurrent API requests. Refreshing preserves
-progress. After a restart, interrupted work waits for an explicit Retry; completed
-vision responses and the downloaded source are reused.
+The app binds to localhost. Everything it produces lives under `data/` (ignored by git).
 
-Detection uses the existing Hogline vision configuration pattern, currently
-`gpt-6.1-terra`, through OpenAI Responses. This is paid image analysis, separate from
-SAM. No API key is stored in manifests, API responses or tracked files. Configure
-`HOGLINE2_YOUTUBE_BROWSER` for yt-dlp authentication when needed. Metadata and video
-are downloaded without retaining signed media URLs or browser cookies in the catalog.
+## Using it
 
-## What counts as an end
+The four tabs of a recording are the four steps, in order.
 
-Start before the first stone's delivery motion (including standing/stick deliveries).
-Finish after score determination and the clearing of played stones. Keep all throws,
-pauses, discussion and measurement within that end. Do not cut at the final stone's
-rest or delayed scoreboard posting. Pre-game warm-up shots and post-game practice are excluded using the sustained sequence
-of competitive ends; ambiguous practice/game transitions are flagged for review.
-There is no fixed end count. An optional expected
-count generates a discrepancy warning; it never changes detection.
+**Ends.** The recording is surveyed with a vision model, which proposes where each end starts
+(the first delivery motion) and finishes (stones cleared). Check the cuts against the video, fix
+them with **Set** / **Go**, then **Save cuts**. **Export clips** writes one MP4 per end without
+re-encoding, so clips begin and finish on the nearest keyframes outside the cuts. Without an API
+key, add the ends by hand. There is no fixed number of ends; the optional count you give when
+adding a recording only produces a warning when detection disagrees.
 
-The detector surveys the full source at 20-second intervals, creates a visual phase
-timeline, proposes physical ends and inspects two-second samples within 80 seconds
-of each proposed boundary. It retains conservative boundary brackets plus two seconds.
-Missed events, occlusion, abnormal layouts and partial recordings can still produce
-wrong proposals. All automatic cuts remain reviewable proposals. Unsupported overlaps
-stop export rather than being silently trimmed. Review **Watch boundary** against the
-original player and save/export revised cuts. Use **Add end** and **Remove** to correct
-the detected count. No complete-game accuracy claim is made without real validation.
+**Tracking.** **Track all ends** runs [stonetrack](stonetrack/README.md) over each end. The first
+run on a recording calibrates the cameras from the painted rings and lines (a few minutes); after
+that an end takes well under a minute, and detections are cached so tracking an end again is
+quick. Ends alternate direction; set which house end 1 is thrown from if the default is wrong.
+The status column flags ends where fewer than 16 deliveries were found or where the stones the
+tracker named do not match what the cameras show at the end of play.
 
-Exports copy the original video/audio bitstreams, with no resizing, crop or frame-rate
-change. They expand outwards to safe keyframes, so they can include a few extra seconds
-around the requested interval. The immutable original remains available. The manifest
-records requested cuts, actual source spans, clip video start PTS, hashes and revision.
-The initial copied packet is matched by SHA-256 to the source to verify the actual cut
-origin; FFmpeg can include an earlier keyframe block than the requested seek.
-For a decoded clip PTS, `source_seconds = source_start + clip_pts - clip_video_start`.
-Do not infer source time from a rounded player display. Editing cuts invalidates the
-published clip list; earlier files remain on disk until deliberately cleaned up.
+**Review shots.** One row per delivery. The video opens just before the stone is thrown, on the
+camera that looks at the target house. Pause when the skip's broom is down and click where it
+touches the ice: that is the whole marking step, and it saves immediately. Label the call with
+`1`–`4`, press `Enter` for the next unmarked shot. Tracked stones are outlined and named on the
+video so wrong identities are easy to spot, and the two top-down maps show the stone's path, its
+heading at release (dashed) and the broom.
 
-## Existing local video
+**Report.** Per player: how far the release heading was from the broom, split by turn, and
+hog-to-hog time by call. Team lineups (who throws which stones) are edited here, and every shot
+can be downloaded as CSV.
+
+What the numbers mean:
+
+- **Line** is the stone's heading over its first six metres past the hog line, carried to the
+  broom's depth, compared with the broom: centimetres to the thrower's left or right.
+  *Narrow* means it started toward the side it then curled to; *wide* is the other side.
+- **Turn** is the direction the stone curled away from that initial line.
+- **Weight** is the hog-to-hog split time; tee-to-hog is shown per shot as well.
+
+Tracking is not perfect. Identities are delivery order per colour, and stones hit while hidden
+can be dropped or left behind. [stonetrack/README.md](stonetrack/README.md) has the measurements
+and the known limits.
+
+## Command line
 
 ```sh
-uv run hogline2 import-local /absolute/path/recording.mp4 \
-  --url 'https://www.youtube.com/watch?v=eDJdwj0JqBY' \
-  --title 'Nov 6 — Koski vs Tillisch (Sheet 1)' --expected-ends 6
+uv run hogline2 import-local /path/recording.mp4 --title 'Nov 6, sheet 1' --expected-ends 6
+uv run hogline2 analyze ID    # detect ends and export clips (web server stopped)
+uv run hogline2 export ID
 ```
 
-This creates an independent media copy and catalog record. Use the UI to detect ends.
-CLI `hogline2 analyze ID` / `hogline2 export ID` work when the web server is stopped;
-they share a process lock so two workers cannot mutate the catalog concurrently.
+## Layout of the repository
 
-## SAM stone tracking
+```
+hogline2/
+  app.py            the FastAPI app; mounts the three areas below
+  cli.py config.py store.py models.py media.py files.py
+  ends/             download, end detection (vision model), cuts and clip export
+  tracking/         camera layout, tracking jobs, the tracking process (runner.py)
+  shots/            aim maths, broom marks, lineups, report
+  static/           the web UI: plain ES modules, no build step
+stonetrack/         the stone tracker, a self-contained package with its own README and tests
+tests/              pytest for the app, node --test for the UI geometry
+docs/               notes on end detection
+```
 
-New recordings reuse the saved broadcast panels, overhead alignment and house directions.
-Perspective zoom and aim start as labeled estimates; alignment adjustments are optional.
-Open a recording's **Stone tracking** page to review the shared layout, run a short
-preview or an entire end, and play the SAM overlay beside a synchronized top-down map.
-Red/yellow IDs reset per end in detected delivery order and are shared across view-local
-tracks. Hidden stationary stones retain their identity; possible contacts and ambiguous
-matches are recorded for review. This is an initial tracking implementation, not a claim
-of complete reconstruction accuracy or full 3D camera calibration.
+Data on disk, per recording `data/recordings/<id>/`:
 
-SAM 2.1 MLX runs in its own process and environment. Downloading/splitting an end does not
-automatically start SAM. The model processes streamed frames with bounded memory. Read
-[SAM setup, calibration and limitations](docs/SAM_SETUP.md) for the provider contract and
-artifacts; a later SAM provider can replace MLX without replacing physical-stone identities.
+| Path | Contents |
+| --- | --- |
+| `source.mp4`, `end-NN-rR.mp4` | the download and the exported clips |
+| `tracking/<run>/` | one tracked end: `job.json`, `status.json`, `stonetrack-result.json` |
+| `tracking/broom-marks.json` | broom marks and calls, keyed `end:stone` |
+| `tracking-jobs/<job>/` | progress and log of a tracking job |
+| `team-lineups.json` | player names |
+| `layout.json` | optional: camera panel layout for a mosaic other than the default |
 
-To try a GPU, choose **Run tracking on → Google Colab GPU**, then **Prepare Colab run**.
-Download the generated notebook and sampled video bundle, run them in Colab, and import
-the result ZIP into the same page. Both SAM2.1 base-plus and large are available.
-See [the Colab tracking workflow](docs/COLAB_TRACKING.md) for steps and transfer limits.
+`data/stonetrack/<id>/` is stonetrack's own cache (background, calibration, detections).
+The catalog of recordings is `data/catalog.sqlite3`.
 
-The [Colab L4 SAM3.1 experiment](docs/COLAB_SAM31_EVALUATION.md) compares CUDA text
-tracking with the existing Mac runs, including timings, masks and reproducible scripts.
-The subsequent [SAM2.1 Colab comparison](docs/COLAB_SAM21_EVALUATION.md) tests the
-official base-plus and large checkpoints in a fresh L4 notebook.
+The camera panel layout defaults to `stonetrack/layouts/wausau.json`. A different broadcast
+mosaic needs a `layout.json` in the same format, in `data/` or in one recording's folder.
 
-**Process whole game** prepares the trimmed recording and end clips, then queues
-full-end SAM2 tracking with one end at a time by default (optionally two). Stop/resume retains completed
-ends. Team lineups assign players by delivery order, with per-stone overrides,
-velocity curves, ratings and accuracy notes. See [whole-game workflow](docs/WHOLE_GAME.md)
-for camera prerequisites, recovery and review limitations.
+## Tests
 
-`data/` and `.env` belong only to Hogline 2. There is no runtime connection to Hogline 1's
-catalog, queue, service or environment. See [migration notes](docs/MIGRATION.md).
+```sh
+uv run pytest
+uv run ruff check
+node --test tests/
+```
 
-Completed runs also include [hog-line aim review](docs/HOG_LINE_AIM.md): a fixed local
-heading, unsmoothed frame-pair rays over the far house, and saved manual broom targets.
-
-## stonetrack tracking (no SAM)
-
-On a recording's **Stone tracking** page, **Run tracking on → This Mac — stonetrack** runs the
-separate tracker in `stonetrack/` instead of SAM. It uses the same End and Interval controls,
-always runs at 20 frames per second, and produces a run the review section opens like any other
-(circles and IDs in the overlay rather than masks; no whole-clip trajectory or aim review yet).
-It needs the `.venv-sam` environment only for NumPy, OpenCV and SciPy. Its own camera calibration
-and detections are cached under `data/stonetrack/<recording>/`; the landmarks on the page are not
-used, only the panel crops. Measurements and limits are in [stonetrack/README.md](stonetrack/README.md).
-stonetrack is the default for single-end runs and for **Process whole game**; SAM is still there
-as an option.
-
-**Broom marks and the aim report** (`/broom?recording=ID`, linked from the tracking page): step
-through the shots of the tracked ends, click where the skip's broom touches the ice, optionally
-label the called shot, and read the per-player report underneath (line by turn, hog-to-hog by
-call). Marks are saved in the recording's `tracking/broom-marks.json`.
-
-The originals of the files this touched are in `data/backups/stonetrack-integration-20261111/`.
-
-## Verification
-
-`uv run pytest` covers URL normalization, end interval invariants, enclosing keyframe
-cuts, original-video export, API revision conflicts, stale clip withholding, request
-deduplication, restart handling plus calibration, physical identity, occlusion and possible-contact behavior. Tests use generated media
-and fake vision results; they do not spend API credits or run SAM.
-
-The first full-recording run and its six exported clips are documented in [validation notes](docs/VALIDATION.md).
+Tests use generated video and stubbed vision and tracking; they spend no API credits.

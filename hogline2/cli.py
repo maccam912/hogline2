@@ -53,7 +53,7 @@ def main():
         )
         print(identifier)
     else:
-        from .pipeline import Worker
+        from .ends.worker import Worker
 
         store = Store(config.data)
         worker = Worker(config, store)

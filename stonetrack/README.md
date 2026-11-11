@@ -1,7 +1,8 @@
 # stonetrack
 
-Curling stone tracking from the club's four-camera YouTube broadcasts. A fresh, self-contained
-core: it shares no code or data with `hogline2/` and can be moved out of this folder as is.
+Curling stone tracking from the club's four-camera YouTube broadcasts. A self-contained package:
+it imports nothing from `hogline2/`, which drives it through `hogline2/tracking/runner.py`, and it
+can be used on its own from the command line.
 
 Dependencies: Python 3.10+, `numpy`, `opencv-python-headless`, `scipy`, and `ffmpeg` on PATH
 (`yt-dlp` only for `fetch`).
@@ -103,8 +104,8 @@ runs a whole game; each end gets `end-NN-tracks.json` and a line in `ends-summar
   The delivery rules above, team alternation and a 20 s minimum gap keep those out of the IDs
   on the two ends tested; a learned detector would be the sturdier fix if they leak through.
 - Panel timing is not synchronised; an 8 cm mean disagreement at mid-sheet may be a ~40 ms lag.
-- Aim (on-broom) and curl metrics are not built yet; `tracks-*.json` has the fused path per stone
-  plus tee-to-hog and hog-to-hog splits.
+- Aim (on-broom) and curl metrics are computed by the app (`hogline2/shots/aim.py`), not here;
+  `tracks-*.json` has the fused path per stone plus tee-to-hog and hog-to-hog splits.
 - `fetch` (yt-dlp) is written but untested here.
 - The panel layout (`layouts/wausau.json`) is the same on both sheets checked; a different mosaic
   needs a new layout file.
