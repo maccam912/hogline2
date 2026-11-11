@@ -115,7 +115,9 @@ class GameRunner:
             run_id = uuid.uuid4().hex
             folder = tracking / run_id
             folder.mkdir(parents=True)
-            task = full_end_job(record, calibration, end, self.job["fps"], self.root.name)
+            task = full_end_job(
+                record, calibration, end, self.job["fps"], self.root.name, self.job.get("execution", "local")
+            )
             atomic(folder / "job.json", task)
             atomic(
                 folder / "status.json",
@@ -134,12 +136,13 @@ class GameRunner:
 
     def launch(self, entry):
         folder = self.config.data / "recordings" / self.job["recording_id"] / "tracking" / entry["run_id"]
+        stonetrack = json.loads((folder / "job.json").read_text()).get("execution") == "stonetrack"
         with (folder / "run.log").open("wb") as log:
             process = self.popen(
                 [
                     str(PROJECT / ".venv-sam/bin/python"),
                     "-m",
-                    "hogline2.tracking_runner",
+                    "hogline2.tracking_stonetrack" if stonetrack else "hogline2.tracking_runner",
                     str(folder / "job.json"),
                 ],
                 cwd=PROJECT,

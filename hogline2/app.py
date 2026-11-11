@@ -186,4 +186,7 @@ def create_app(config=None, start_worker=True):
     from .game_api import mount_game
 
     mount_game(app, config, store)
+    from .broom_api import mount_broom
+
+    mount_broom(app, config, store)
     return app

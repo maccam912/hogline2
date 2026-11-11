@@ -40,7 +40,11 @@ def active_tracking(data):
         status = json.loads(path.read_text())
         if status.get("state") in {"queued", "running"} and any(
             alive(status.get("pid"), module, path.parent / "job.json")
-            for module in ["hogline2.tracking_runner", "hogline2.tracking_comparison"]
+            for module in [
+                "hogline2.tracking_runner",
+                "hogline2.tracking_stonetrack",
+                "hogline2.tracking_comparison",
+            ]
         ):
             return path.parent
     return None
@@ -72,7 +76,7 @@ def gpu_lease(recordings, exclusive=False):
             slot.close()
 
 
-def full_end_job(record, calibration, end, fps, game_id):
+def full_end_job(record, calibration, end, fps, game_id, execution="stonetrack"):
     delivery_end = calibration["first_delivery_end"]
     if (end["number"] - 1) % 2:
         delivery_end = "A" if delivery_end == "B" else "B"
@@ -81,8 +85,10 @@ def full_end_job(record, calibration, end, fps, game_id):
     )
     if not view or not view["landmarks"].get("hack"):
         raise ValueError(f"Mark the delivery hack for house {delivery_end} before tracking the whole game")
+    stonetrack = execution == "stonetrack"
     return dict(
-        backend="sam2.1-mlx-granite",
+        backend="stonetrack-0.1" if stonetrack else "sam2.1-mlx-granite",
+        execution="stonetrack" if stonetrack else "local",
         recording_id=record["id"],
         source_path=record["source_path"],
         source_sha256=record["source_sha256"],
@@ -92,7 +98,7 @@ def full_end_job(record, calibration, end, fps, game_id):
         end=end,
         source_start=end["start_seconds"],
         duration=end["end_seconds"] - end["start_seconds"],
-        fps=fps,
+        fps=20.0 if stonetrack else fps,  # stonetrack's rules are written for 20 frames a second
         delivery_view=view["id"],
         seeds=[],
         game_job_id=game_id,

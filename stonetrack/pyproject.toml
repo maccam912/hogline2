@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stonetrack"
+version = "0.1.0"
+description = "Curling stone tracking from fixed multi-camera club broadcasts"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "opencv-python-headless>=4.9", "scipy>=1.11"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[project.scripts]
+stonetrack = "stonetrack.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["stonetrack"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,11 @@
+{
+  "name": "Wausau Curling Club, Curling Stadium four-view mosaic",
+  "width": 1920,
+  "height": 1080,
+  "views": [
+    {"id": "perspective_a", "kind": "perspective", "end": "A", "crop": [0, 0, 724, 990]},
+    {"id": "perspective_b", "kind": "perspective", "end": "B", "crop": [1200, 0, 1920, 990]},
+    {"id": "overhead_a", "kind": "overhead", "end": "A", "crop": [730, 7, 1188, 463], "rotation_degrees": 180},
+    {"id": "overhead_b", "kind": "overhead", "end": "B", "crop": [730, 611, 1188, 1063], "rotation_degrees": 180}
+  ]
+}

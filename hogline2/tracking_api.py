@@ -84,7 +84,7 @@ class TrackingRequest(Model):
     duration_seconds: float | None = Field(default=60, gt=0)
     delivery_view: str | None = None
     seeds: list[Seed] = Field(default_factory=list, max_length=16)
-    execution: Literal["local", "colab"] = "local"
+    execution: Literal["local", "colab", "stonetrack"] = "stonetrack"
     colab_model: Literal["base_plus", "large"] = "base_plus"
 
 
@@ -200,6 +200,7 @@ def mount_tracking(app, config, store):
                                 "hogline2.tracking_runner",
                                 "hogline2.tracking_comparison",
                                 "hogline2.tracking_colab",
+                                "hogline2.tracking_stonetrack",
                             )
                         )
                         and f"{path.parent.name}/job.json" in command
@@ -258,6 +259,7 @@ def mount_tracking(app, config, store):
                             "hogline2.tracking_runner",
                             "hogline2.tracking_comparison",
                             "hogline2.tracking_colab",
+                            "hogline2.tracking_stonetrack",
                         )
                     )
                     and f"{status_path.parent.name}/job.json" in command
@@ -314,6 +316,8 @@ def mount_tracking(app, config, store):
                     "sam2.1-cuda-large-granite" if request.colab_model == "large" else "sam2.1-cuda-granite"
                 )
                 if request.execution == "colab"
+                else "stonetrack-0.1"
+                if request.execution == "stonetrack"
                 else "sam2.1-mlx-granite",
                 execution=request.execution,
                 recording_id=identifier,
@@ -325,7 +329,8 @@ def mount_tracking(app, config, store):
                 end=end,
                 source_start=start_seconds,
                 duration=duration,
-                fps=request.fps,
+                # stonetrack's tracking rules are written for 20 frames a second
+                fps=20.0 if request.execution == "stonetrack" else request.fps,
                 delivery_view=delivery_view["id"],
                 seeds=[s.model_dump() for s in request.seeds],
             )
@@ -334,7 +339,11 @@ def mount_tracking(app, config, store):
                 json.dumps(
                     dict(
                         state="queued",
-                        stage="Preparing Colab" if request.execution == "colab" else "Starting SAM",
+                        stage="Preparing Colab"
+                        if request.execution == "colab"
+                        else "Starting stonetrack"
+                        if request.execution == "stonetrack"
+                        else "Starting SAM",
                         progress=0,
                     )
                 )
@@ -346,6 +355,8 @@ def mount_tracking(app, config, store):
                         "-m",
                         "hogline2.tracking_colab"
                         if request.execution == "colab"
+                        else "hogline2.tracking_stonetrack"
+                        if request.execution == "stonetrack"
                         else "hogline2.tracking_runner",
                         str(folder / "job.json"),
                     ],
@@ -382,6 +393,7 @@ def mount_tracking(app, config, store):
                         "hogline2.tracking_runner",
                         "hogline2.tracking_comparison",
                         "hogline2.tracking_colab",
+                        "hogline2.tracking_stonetrack",
                     )
                 )
                 or f"{folder.name}/job.json" not in command
@@ -444,6 +456,7 @@ def mount_tracking(app, config, store):
             "events.json",
             "trajectory.json",
             "trajectory-summary.json",
+            "stonetrack-result.json",
             "geometry-report.json",
             "raw-velocity.json",
             "comparison.html",

@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hogline 2 · Broom marks</title><link rel="stylesheet" href="/static/style.css">
+<style>
+.broom-grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px}
+#shots{max-height:72vh;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+#shots button{text-align:left;font-size:.85rem;padding:4px 8px}
+#shots button.current{outline:2px solid #274d43}
+#shots h3{margin:10px 0 2px;font-size:.8rem}
+#frame{width:100%;cursor:crosshair;background:#dce7e5;border-radius:10px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin:8px 0}
+table{border-collapse:collapse;font-size:.9rem}td,th{padding:4px 10px;border-bottom:1px solid #cfd8d5;text-align:left}
+kbd{border:1px solid #9aa;border-radius:4px;padding:0 4px;font-size:.8rem}
+</style></head>
+<body><header><div class="brand">◉ HOGline <span>2</span></div><a id="back" href="/">← Tracking</a></header><main>
+<p class="eyebrow">WHERE WAS THE BROOM?</p><h1>Mark the skip's broom.</h1>
+<p>For each shot, step to a frame where the broom is down and click where it touches the ice. One click per shot is all the aim numbers need.</p>
+<p id="message" role="status"></p>
+<div class="broom-grid"><nav id="shots" aria-label="Shots"></nav><section>
+<h2 id="title">Loading…</h2>
+<div class="controls"><label>Camera<select id="view"></select></label>
+<button class="secondary" data-step="-1">−1 s</button><button class="secondary" data-step="-0.2">−0.2 s</button><span id="clock" class="muted"></span><button class="secondary" data-step="0.2">+0.2 s</button><button class="secondary" data-step="1">+1 s</button>
+<label>Called shot<select id="call"><option value="">not labelled</option></select></label>
+<button id="save">Save and next</button><button id="none" class="secondary">No broom visible</button></div>
+<canvas id="frame" width="1280" height="720"></canvas>
+<p id="result" class="muted"></p>
+<p class="muted">Keys: <kbd>←</kbd> <kbd>→</kbd> previous / next shot · <kbd>,</kbd> <kbd>.</kbd> step 0.2 s · <kbd>Enter</kbd> save and next · <kbd>v</kbd> switch camera. The frame starts three seconds before the stone crosses the tee line.</p>
+</section></div>
+<h2>Report</h2><p class="muted">Line is the stone's heading just after release, carried to the broom's depth. Narrow means it left toward the side it then curled; wide is the other side. Clockwise is an in-turn for a right-hander. Weight is the hog-to-hog time, grouped by the called shot when one is labelled. Players come from the team lineups by delivery order.</p>
+<div id="report"></div>
+</main><script type="module" src="/static/broom.js"></script></body></html>

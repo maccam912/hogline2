@@ -6,7 +6,7 @@ export function mountColab({base, say, fail, poll, openRun}) {
   let signature = '', importing = false;
   try {
     const saved = localStorage.getItem(preference);
-    if (saved === 'colab' || saved === 'local') execution.value = saved;
+    if (saved === 'colab' || saved === 'local' || saved === 'stonetrack') execution.value = saved;
   } catch {
     // The selector still works if the browser blocks storage.
   }
@@ -14,7 +14,11 @@ export function mountColab({base, say, fail, poll, openRun}) {
     const cloud = execution.value === 'colab';
     $('#colab-model-label').hidden = !cloud;
     $('#colab-explanation').hidden = !cloud;
-    $('#run').textContent = cloud ? 'Prepare Colab run' : 'Track on this Mac';
+    const stonetrack = execution.value === 'stonetrack';
+    const note = $('#stonetrack-explanation');
+    if (note) note.hidden = !stonetrack;
+    $('#fps').disabled = stonetrack;
+    $('#run').textContent = cloud ? 'Prepare Colab run' : stonetrack ? 'Track with stonetrack' : 'Track on this Mac';
   }
   execution.onchange = () => {
     showExecution();

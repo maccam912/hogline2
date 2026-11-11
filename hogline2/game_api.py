@@ -9,6 +9,7 @@ import subprocess
 import time
 import uuid
 from fractions import Fraction
+from typing import Literal
 
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
@@ -24,6 +25,7 @@ from .tracking_layout import read_calibration
 class GameRequest(Model):
     concurrency: int = Field(default=1, ge=1, le=2)
     fps: float = Field(default=3, ge=1, le=60)
+    execution: Literal["stonetrack", "local"] = "stonetrack"
 
 
 class TeamLineups(Model):
@@ -126,7 +128,7 @@ def mount_game(app, config, store):
                 dict(number=1, start_seconds=0, end_seconds=1),
                 dict(number=2, start_seconds=1, end_seconds=2),
             ]:
-                full_end_job(record, calibration, end, request.fps, "validation")
+                full_end_job(record, calibration, end, request.fps, "validation", request.execution)
             if not (PROJECT / ".venv-sam/bin/python").is_file():
                 raise HTTPException(400, "Install the SAM environment first")
             job_id = uuid.uuid4().hex
@@ -139,6 +141,7 @@ def mount_game(app, config, store):
                     data_root=str(config.data),
                     concurrency=request.concurrency,
                     fps=request.fps,
+                    execution=request.execution,
                     calibration=calibration,
                     boundary_revision=record["revision"] if record.get("ends") else None,
                 ),
@@ -166,7 +169,10 @@ def mount_game(app, config, store):
             else:
                 for entry in status.get("ends", []):
                     child = root(identifier) / "tracking" / entry["run_id"]
-                    if alive(entry.get("pid"), "hogline2.tracking_runner", child / "job.json"):
+                    if any(
+                        alive(entry.get("pid"), module, child / "job.json")
+                        for module in ("hogline2.tracking_runner", "hogline2.tracking_stonetrack")
+                    ):
                         try:
                             os.kill(entry["pid"], signal.SIGTERM)
                         except ProcessLookupError:

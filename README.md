@@ -108,6 +108,25 @@ catalog, queue, service or environment. See [migration notes](docs/MIGRATION.md)
 Completed runs also include [hog-line aim review](docs/HOG_LINE_AIM.md): a fixed local
 heading, unsmoothed frame-pair rays over the far house, and saved manual broom targets.
 
+## stonetrack tracking (no SAM)
+
+On a recording's **Stone tracking** page, **Run tracking on → This Mac — stonetrack** runs the
+separate tracker in `stonetrack/` instead of SAM. It uses the same End and Interval controls,
+always runs at 20 frames per second, and produces a run the review section opens like any other
+(circles and IDs in the overlay rather than masks; no whole-clip trajectory or aim review yet).
+It needs the `.venv-sam` environment only for NumPy, OpenCV and SciPy. Its own camera calibration
+and detections are cached under `data/stonetrack/<recording>/`; the landmarks on the page are not
+used, only the panel crops. Measurements and limits are in [stonetrack/README.md](stonetrack/README.md).
+stonetrack is the default for single-end runs and for **Process whole game**; SAM is still there
+as an option.
+
+**Broom marks and the aim report** (`/broom?recording=ID`, linked from the tracking page): step
+through the shots of the tracked ends, click where the skip's broom touches the ice, optionally
+label the called shot, and read the per-player report underneath (line by turn, hog-to-hog by
+call). Marks are saved in the recording's `tracking/broom-marks.json`.
+
+The originals of the files this touched are in `data/backups/stonetrack-integration-20261111/`.
+
 ## Verification
 
 `uv run pytest` covers URL normalization, end interval invariants, enclosing keyframe
