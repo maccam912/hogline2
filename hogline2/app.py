@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import Config
 from .ends.api import mount_recordings
 from .ends.worker import Worker
+from .ice.api import mount_ice
 from .shots.api import mount_shots
 from .store import Store
 from .tracking.api import mount_tracking
@@ -57,4 +58,5 @@ def create_app(config=None, start_worker=True):
     mount_recordings(app, config, store, worker)
     mount_tracking(app, config, store)
     mount_shots(app, config, store)
+    mount_ice(app, config, store)
     return app

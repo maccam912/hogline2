@@ -4,8 +4,9 @@ A local workbench for curling game video. Paste the link to a finished YouTube s
 
 1. download the recording and split it into ends,
 2. track every stone down the sheet in each end,
-3. let you step through the shots, mark the skip's broom and label the call, and
-4. report line and weight per player.
+3. let you step through the shots, mark the skip's broom and label the call,
+4. report line and weight per player, and
+5. report what the ice did: its speed, how much it curled, and where it pushed stones sideways.
 
 ## Run
 
@@ -21,7 +22,7 @@ The app binds to localhost. Everything it produces lives under `data/` (ignored 
 
 ## Using it
 
-The four tabs of a recording are the four steps, in order.
+The first four tabs of a recording are the four steps, in order; the fifth needs only tracking.
 
 **Ends.** The recording is surveyed with a vision model, which proposes where each end starts
 (the first delivery motion) and finishes (stones cleared). Check the cuts against the video, fix
@@ -47,6 +48,17 @@ heading at release (dashed) and the broom.
 **Report.** Per player: how far the release heading was from the broom, split by turn, and
 hog-to-hog time by call. Team lineups (who throws which stones) are edited here, and every shot
 can be downloaded as CSV.
+
+**Ice.** What the sheet did to the stones, from every free glide in the game (near hog line until
+the stone stops, leaves or touches another). Three maps of the sheet: *falls* (arrows: sideways
+pull that is the same whatever the turn, i.e. a slope or a run), *curl* (swingier or straighter
+than the sheet's average) and *speed* (keener or heavier). A patch of ice is the same patch
+whichever way a stone crosses it, and curl flips with the turn while a fall does not, so stones
+thrown both ways with both turns separate the two. Each map carries a verdict: it counts as real
+only if it predicts shots that were left out of the fit better than uniform ice does. The page
+also gives the draw time and curl for a tee-line draw in each direction and down each side.
+Sweeping is not observed, so a zone that reads fast and straight may be brooms rather than ice.
+The model and its assumptions are described at the top of `hogline2/ice/model.py`.
 
 What the numbers mean:
 
@@ -77,6 +89,7 @@ hogline2/
   ends/             download, end detection (vision model), cuts and clip export
   tracking/         camera layout, tracking jobs, the tracking process (runner.py)
   shots/            aim maths, broom marks, lineups, report
+  ice/              the ice model (speed, curl, falls) and its report
   static/           the web UI: plain ES modules, no build step
 stonetrack/         the stone tracker, a self-contained package with its own README and tests
 tests/              pytest for the app, node --test for the UI geometry
