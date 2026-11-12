@@ -1,0 +1,130 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: #06090b; color: #fff;
+    font-family: "Avenir Next", "Helvetica Neue", sans-serif; }
+  #clip { position: absolute; inset: 0; overflow: hidden; }
+  video { position: absolute; transform-origin: 0 0; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 35%, rgba(0,0,0,.75) 100%); }
+  .bar { position: absolute; left: 0; right: 0; height: 92px; background: #000; }
+  #line { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; }
+  #stage { position: absolute; inset: 0; display: grid; place-items: center; }
+  #rings { position: absolute; left: 50%; top: 50%; }
+  #rings circle { fill: none; }
+  #logo { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; letter-spacing: .14em; }
+  #logo b { color: #6ec1ff; font-weight: 800; }
+  #tag { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; letter-spacing: .32em; color: #9fb3ba; font-size: 19px; }
+  .l { position: absolute; left: 0; right: 0; text-align: center; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  #black { position: absolute; inset: 0; background: #000; opacity: 0; }
+</style>
+<div id="clip"><video id="v" src="open.mp4" muted preload="auto"></video></div>
+<div id="vig"></div>
+<div id="stage">
+  <svg id="rings" width="900" height="900" viewBox="-450 -450 900 900" style="margin:-450px 0 0 -450px">
+    <circle id="r1" r="366" stroke="#2f6fb5" stroke-width="2"/>
+    <circle id="r2" r="244" stroke="#dfe8ea" stroke-width="1.5"/>
+    <circle id="r3" r="122" stroke="#4fae6a" stroke-width="2"/>
+    <circle id="r4" r="30" stroke="#dfe8ea" stroke-width="1.5"/>
+  </svg>
+  <div id="logo">HOGLINE <b>2</b></div>
+  <div id="tag"></div>
+  <div class="l" id="l1"></div><div class="l" id="l2"></div><div class="l" id="l3"></div>
+</div>
+<div class="bar" id="bt" style="top:0"></div><div class="bar" id="bb" style="bottom:0"></div>
+<div id="line"></div>
+<div id="flash"></div><div id="black"></div>
+<script>
+const $ = s => document.querySelector(s), v = $('#v');
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = cl(x); return x * x * (3 - 2 * x); };
+const out = x => 1 - Math.pow(1 - cl(x), 3);
+// opacity envelope: in over `i` frames from a, out over `o` frames ending at b
+const env = (f, a, b, i = 12, o = 10) => cl(Math.min((f - a) / i, (b - f) / o));
+
+async function seek(t) {
+  if (Math.abs(v.currentTime - t) > 1e-3) await new Promise(r => { v.addEventListener('seeked', r, {once: true}); v.currentTime = t; });
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+}
+function crop(x0, y0, w, filter) {
+  const s = 1280 / w;
+  v.style.width = 1920 * s + 'px'; v.style.height = 1080 * s + 'px';
+  v.style.left = -x0 * s + 'px'; v.style.top = -y0 * s + 'px';
+  v.style.filter = filter;
+}
+function show(map) {
+  for (const id of ['clip', 'vig', 'rings', 'logo', 'tag', 'l1', 'l2', 'l3', 'bt', 'bb', 'line'])
+    $('#' + id).style.display = map.includes(id) ? '' : 'none';
+}
+function text(el, html, o, top, size, extra = '') {
+  el.innerHTML = html; el.style.cssText = `opacity:${o};top:${top}px;font-size:${size}px;${extra}`;
+}
+
+const GRADE = 'saturate(.7) contrast(1.12) brightness(.82)';
+const scenes = {
+  // 288 frames: three shots of one delivery, three lines
+  async open(f) {
+    show(['clip', 'vig', 'bt', 'bb', 'line']);
+    let t, c;
+    if (f < 84) { const k = f / 84; t = 2.9 + f / 30; c = [1245 - 0 * k, 20 + 6 * k, 640 - 40 * k]; }
+    else if (f < 156) { const k = (f - 84) / 72; t = 13.4 + (f - 84) / 30; c = [20 + 10 * k, 300 + 10 * k, 620 - 30 * k]; }
+    else { const k = (f - 156) / 132; t = 23.6 + (f - 156) / 30; c = [70 + 20 * k, 150 + 12 * k, 600 - 50 * k]; }
+    await seek(t);
+    crop(...c, GRADE);
+    const lines = [
+      [10, 80, 'Every league night, the club streams your game.'],
+      [90, 152, 'Sixteen stones an end. Two hours of video.'],
+      [162, 270, 'How many of yours were actually <i style="font-style:normal;color:#6ec1ff">on the broom?</i>'],
+    ];
+    let html = '', o = 0;
+    for (const [a, b, s] of lines) { const e = env(f, a, b); if (e > 0) { html = s; o = e; } }
+    text($('#line'), html, o, 548, 34, 'letter-spacing:.01em;text-shadow:0 2px 18px rgba(0,0,0,.9)');
+    $('#black').style.opacity = Math.max(1 - f / 24, cl((f - 276) / 8));
+    $('#flash').style.opacity = 0;
+  },
+  // 144 frames: the name
+  async title(f) {
+    show(['rings', 'logo', 'tag']);
+    const k = out(f / 50);
+    ['r1', 'r2', 'r3', 'r4'].forEach((id, i) => {
+      const e = out((f - i * 3) / 45);
+      $('#' + id).style.opacity = .55 * e; $('#' + id).style.transform = `scale(${.72 + .28 * e + f * .0004})`;
+    });
+    text($('#logo'), 'HOGLINE <b>2</b>', cl(f / 5), 282, 112, `transform:scale(${1.1 - .1 * k});text-shadow:0 0 60px rgba(110,193,255,${.45 * (1 - k) + .12})`);
+    text($('#tag'), 'YOUR LEAGUE GAME, MEASURED', ease((f - 28) / 22), 438, 19);
+    $('#flash').style.opacity = .85 * Math.pow(1 - cl(f / 14), 2);
+    $('#black').style.opacity = cl((f - 138) / 6);
+  },
+  // 288 frames: three questions and a punch line over blurred footage
+  async why(f) {
+    const bar = Math.floor(f / 72), g = f % 72;
+    show(bar < 3 ? ['clip', 'vig', 'l1'] : ['rings', 'l1']);
+    $('#flash').style.opacity = 0;
+    if (bar < 3) {
+      await seek([4.2, 14.2, 25.0][bar] + g / 60);
+      crop([1230, 0, 40][bar], [10, 290, 120][bar], 680 - g * .3, 'blur(9px) saturate(.6) brightness(.38)');
+      const q = ['Was it the throw,<br>or was it the ice?', 'Wide every time<br>you throw clockwise?', 'Is your draw weight<br>really fourteen seconds?'][bar];
+      text($('#l1'), q, env(g, 0, 70, 6, 6), 262, 62, `font-weight:600;line-height:1.18;transform:scale(${1 + g * .0006})`);
+      $('#black').style.opacity = 0;
+    } else {
+      ['r1', 'r2', 'r3', 'r4'].forEach(id => { $('#' + id).style.opacity = .3; $('#' + id).style.transform = `scale(${1 + g * .001})`; });
+      text($('#l1'), 'Stop guessing.', cl(g / 4), 300, 92, `font-weight:800;letter-spacing:.02em;transform:scale(${1.06 - .06 * out(g / 30)})`);
+      $('#flash').style.opacity = .7 * Math.pow(1 - cl(g / 12), 2);
+      $('#black').style.opacity = cl((g - 66) / 6);
+    }
+  },
+  // 288 frames: the ask
+  async end(f) {
+    show(['rings', 'logo', 'tag', 'l1', 'l2', 'l3']);
+    ['r1', 'r2', 'r3', 'r4'].forEach(id => { $('#' + id).style.opacity = .22; $('#' + id).style.transform = `scale(${1 + f * .0003})`; });
+    text($('#logo'), 'HOGLINE <b>2</b>', cl(f / 5), 150, 84, `transform:scale(${1.05 - .05 * out(f / 40)})`);
+    text($('#tag'), 'YOUR LEAGUE GAME, MEASURED', ease((f - 14) / 20), 270, 17);
+    text($('#l1'), 'Works with the streams the club already makes.', ease((f - 48) / 18), 362, 30, 'font-weight:500');
+    text($('#l2'), 'Runs on an ordinary laptop. Nothing to install at the club.', ease((f - 90) / 18), 412, 30, 'font-weight:500');
+    text($('#l3'), 'Want your game measured? <span style="color:#6ec1ff">Come find Matt.</span>', ease((f - 138) / 18), 500, 38, 'font-weight:700');
+    $('#flash').style.opacity = .6 * Math.pow(1 - cl(f / 12), 2);
+    $('#black').style.opacity = cl((f - 250) / 34);
+  },
+};
+window.render = (scene, f) => scenes[scene](f);
+</script>

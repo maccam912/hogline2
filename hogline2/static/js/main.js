@@ -1,18 +1,20 @@
 // App shell: the top bar and a tiny hash router.
 //   #/                         all recordings
-//   #/r/<id>/<tab>[?end=&shot=]   one recording: ends | tracking | review | report
+//   #/r/<id>/<tab>[?end=&shot=]   one recording: ends | tracking | review | report | ice
 import {api, esc, link, toast} from './util.js';
 import * as home from './home.js';
 import * as ends from './ends.js';
 import * as tracking from './tracking.js';
 import * as review from './review.js';
 import * as report from './report.js';
+import * as ice from './ice.js';
 
 const TABS = [
   ['ends', 'Ends', ends],
   ['tracking', 'Tracking', tracking],
   ['review', 'Review shots', review],
   ['report', 'Report', report],
+  ['ice', 'Ice', ice],
 ];
 const view = document.querySelector('#view');
 const picker = document.querySelector('#recording-picker');
